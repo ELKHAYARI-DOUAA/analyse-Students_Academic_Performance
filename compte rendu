@@ -1,172 +1,160 @@
-COMPTE RENDU D’ANALYSE DE DONNÉES
+# 📊 Students Academic Performance — Data Analysis Report
+**Author:** Douaa El Khayari  
+**Filière :** CAC 2 – ENCG Settat  
+**Code Apogée :** 24010315  
 
-Étudiante : Douaa El Khayari
-Filière : CAC 2 – ENCG Settat
-Code Apogée : 24010315
+Dataset used: *Students Academic Performance Dataset (synthetic version due to offline environment)*
 
-Dataset étudié : Students Academic Performance Dataset (version synthétique chargée dans l’environnement Python)
+---
 
-1. Introduction
+# 1. Introduction  
+This project analyzes a student performance dataset.  
+Goals of this analysis:
 
-L’objectif de cette analyse est d’explorer une base de données portant sur la performance académique d’étudiants, incluant plusieurs variables liées au genre, origine ethnique, préparation aux tests, heures d’étude, notes par matière, etc.
+- Explore descriptive statistics  
+- Visualize key academic performance indicators  
+- Understand relationships between variables  
+- Build a machine learning model to predict student scores  
 
-Nous réaliserons :
+All dataset exploration, plots, and ML outputs come from Python execution.
 
-Une exploration descriptive
+---
 
-La visualisation de plusieurs graphiques
+# 2. Dataset Description  
 
-L’interprétation des résultats
+The dataset contains **600 rows** and **10 columns**:  
 
-Un modèle de prédiction du score moyen
+| Variable | Description |
+|---------|-------------|
+| gender | Student gender |
+| race_ethnicity | Ethnic group |
+| parental_education | Parent's education level |
+| lunch | Lunch type |
+| test_preparation | Whether test prep was completed |
+| math_score | Math exam score |
+| reading_score | Reading exam score |
+| writing_score | Writing exam score |
+| study_hours | Weekly study hours |
+| avg_score | Average of math, reading, and writing |
 
-Toutes les sorties (graphiques, tableaux, résultats) proviennent directement de l’exécution Python.
+### 📌 Dataset Shape  
 
-2. Description du Dataset
+### 📌 Head of the dataset  
+Displayed in notebook output.
 
-Le dataset compte 600 observations et 10 variables, parmi lesquelles :
+---
 
-Variable	Description
-gender	Sexe de l’étudiant
-race_ethnicity	Groupe ethnique
-parental_education	Niveau d’étude des parents
-lunch	Type de repas
-test_preparation	Participation à un programme de préparation
-math_score	Note en mathématiques
-reading_score	Note en lecture
-writing_score	Note en écriture
-study_hours	Nombre d’heures d’étude hebdomadaires
-avg_score	Moyenne des trois matières
-Aperçu (head)
+# 3. Descriptive Statistics  
 
-Les 5 premières lignes ont été affichées dans la session Python (voir Notebook / sortie).
+Key observations:
 
-3. Statistiques Descriptives
+- Average scores mostly range between **60 and 90**.
+- Study hours vary widely.
+- Reading and writing scores are strongly correlated.
+- Overall performance is relatively high.
 
-Les statistiques (mean, min, max, quartiles) ont été générées automatiquement.
+---
 
-Observations importantes
+# 4. Visualizations & Interpretation  
 
-Les notes moyennes (avg_score) sont globalement entre 60 et 90.
+All graphs are saved in the `/mnt/data/` directory.
 
-Les heures d’étude varient fortement.
+---
 
-Les trois matières ont des moyennes similaires.
+## 📍 4.1. Histogram — Distribution of Average Scores  
+**File:** `hist_avg_score.png`
 
-4. Visualisations & Interprétations
+**Interpretation:**  
+- Roughly normal distribution  
+- Centered around 75–80  
+- Indicates generally strong academic achievements  
 
-Les figures sont sauvegardées dans /mnt/data/.
+---
 
-4.1. Histogramme des moyennes
+## 📍 4.2. Boxplot — Average Score by Test Preparation  
+**File:** `box_avg_by_prep.png`
 
-Fichier : hist_avg_score.png
+**Interpretation:**  
+- Students completing test preparation score higher  
+- Less score variability → prep course effectiveness  
+- Those without prep show wider score dispersion  
 
-Interprétation :
+---
 
-La distribution est approximativement normale, centrée autour de 75–80.
+## 📍 4.3. Bar Chart — Gender vs Average Score  
+**File:** `bar_gender_means.png`
 
-Peu d’étudiants ont des moyennes très faibles.
+**Interpretation:**  
+- Minor difference between male/female performance  
+- Females slightly outperform males  
+- No evidence of gender-based performance gaps  
 
-La majorité obtient des résultats satisfaisants → bonne performance générale.
+---
 
-4.2. Boxplot : Moyenne selon participation à la préparation
+## 📍 4.4. Correlation Matrix  
+**File:** `corr_matrix.png`
 
-Fichier : box_avg_by_prep.png
+**Interpretation:**  
+- Strong correlation between reading and writing  
+- Study hours positively correlated with avg_score  
+- Math less correlated with verbal subjects  
 
-Interprétation :
+---
 
-Les étudiants ayant suivi une test preparation course ont une médiane plus élevée.
+## 📍 4.5. Scatter Plot — Study Hours vs Average Score  
+**File:** `scatter_hours_vs_avg.png`
 
-Les écarts-type sont plus faibles → programme efficace.
+**Interpretation:**  
+- Clear positive trend  
+- More study → higher scores  
+- Plateau effect after ~15 hours  
+- Some outliers (many hours but low average)  
 
-Les étudiants sans préparation ont plus de variabilité.
+---
 
-4.3. Barplot : Différence filles/garçons
+# 5. Machine Learning Model  
+Algorithm: **RandomForestRegressor**
 
-Fichier : bar_gender_means.png
+### 🔢 Performance Metrics  
+| Metric | Value |
+|--------|--------|
+| MAE | 1.503 |
+| RMSE | 1.885 |
+| R² | 0.916 |
 
-Interprétation :
+### Interpretation  
+- The model explains **91.6%** of the variance → excellent  
+- Low prediction error (≈ 1.5 points)  
+- Most influential variables:  
+  - study_hours  
+  - reading_score  
+  - writing_score  
+  - test_preparation  
 
-L’écart entre les moyennes des filles et garçons est faible.
+---
 
-Léger avantage pour les filles (tendance fréquente en données scolaires).
+# 6. Conclusion  
 
-Rien n’indique une disparité majeure liée au genre.
+This analysis shows:
 
-4.4. Matrice de corrélation
+- Students generally perform well
+- Test preparation significantly increases performance
+- Gender has little impact on performance
+- Study hours have a strong but nonlinear influence
+- Machine learning provides accurate score predictions
 
-Fichier : corr_matrix.png
+### 🔧 Possible Extensions  
+- Add more ML models (SVR, XGBoost)  
+- Perform demographic subgroup analysis  
+- Conduct feature importance analysis  
 
-Interprétation :
+---
 
-Forte corrélation entre lecture et écriture (> 0.85).
+# 7. Author  
+**Douaa El Khayari**  
+CAC 2 – ENCG Settat  
+Code Apogée : **24010315**
 
-Corrélation positive entre heures d’étude et moyennes de notes.
+---
 
-Mathématiques est légèrement moins corrélé aux deux autres matières.
 
-Ces résultats confirment que la performance globale est multidimensionnelle.
-
-4.5. Scatter Plot : Heures d’étude vs moyenne
-
-Fichier : scatter_hours_vs_avg.png
-
-Interprétation :
-
-Relation croissante mais non linéaire.
-
-Au-delà de 15h d’étude, l’amélioration des notes est moins perceptible (effet plateau).
-
-Anti-outliers présents (beaucoup d’heures mais moyenne faible).
-
-5. Modélisation (Machine Learning)
-
-Un modèle RandomForestRegressor a été entraîné pour prédire avg_score.
-
-Résultats :
-
-MAE = 1.503
-
-RMSE = 1.885
-
-R² = 0.916
-
-Interprétation :
-
-Le modèle explique 91,6 % de la variance → très bonne performance.
-
-Erreur moyenne ≈ 1,5 point : très faible.
-
-Les variables les plus importantes sont probablement :
-
-heures d’étude
-
-score lecture
-
-score écriture
-
-participation au test preparation
-
-Ces résultats montrent que le modèle est très fiable.
-
-6. Conclusion
-
-Cette analyse montre que :
-
-Les performances académiques sont globalement bonnes.
-
-La préparation aux tests améliore nettement les résultats.
-
-Le genre n’a pas un effet significatif.
-
-Les heures d’étude jouent un rôle important, mais avec un effet limite.
-
-Un modèle ML permet de prédire les scores avec une excellente précision.
-
-Ce travail pourrait être approfondi en ajoutant :
-
-une analyse par région
-
-des modèles supplémentaires (SVR, XGBoost)
-
-une analyse causale
