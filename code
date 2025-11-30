@@ -1,0 +1,148 @@
+# Notebook-style analysis for "students-academic-performance-dataset"
+# Replace file_path = "" and install/configure kagglehub on your machine
+# if you want to load the real dataset. Otherwise the script falls back to a synthetic example.
+
+import os, math, pandas as pd, numpy as np, matplotlib.pyplot as plt
+os.makedirs('/mnt/data', exist_ok=True)
+
+df = None
+try:
+    import kagglehub
+    from kagglehub import KaggleDatasetAdapter
+    file_path = ""  # set if needed
+    df = kagglehub.load_dataset(
+        KaggleDatasetAdapter.PANDAS,
+        "sadiajavedd/students-academic-performance-dataset",
+        file_path
+    )
+    print("Loaded dataset from kagglehub. Shape:", df.shape)
+except Exception as e:
+    print("Could not load dataset via kagglehub; using synthetic example.")
+    rng = np.random.default_rng(42)
+    n = 600
+    df = pd.DataFrame({
+        "gender": rng.choice(["male", "female"], size=n, p=[0.45, 0.55]),
+        "race_ethnicity": rng.choice(["group A","group B","group C","group D","group E"], size=n),
+        "parental_level_of_education": rng.choice([
+            "some high school","high school","some college","associate's degree","bachelor's degree","master's degree"
+        ], size=n),
+        "lunch": rng.choice(["standard","free/reduced"], size=n, p=[0.8,0.2]),
+        "test_preparation_course": rng.choice(["none","completed"], size=n, p=[0.6,0.4]),
+        "math_score": (rng.normal(65, 12, size=n)).clip(0,100).round().astype(int),
+        "reading_score": (rng.normal(70, 11, size=n)).clip(0,100).round().astype(int),
+        "writing_score": (rng.normal(68, 12, size=n)).clip(0,100).round().astype(int),
+        "hours_study_per_week": rng.integers(0, 20, size=n)
+    })
+    df["avg_score"] = df[["math_score","reading_score","writing_score"]].mean(axis=1).round(1)
+    df.loc[df["test_preparation_course"]=="completed", ["avg_score"]] += 3.2
+    df["avg_score"] = df["avg_score"].clip(0,100)
+    for col in ["parental_level_of_education","hours_study_per_week"]:
+        mask = rng.random(n) < 0.02
+        df.loc[mask, col] = np.nan
+
+# === EDA ===
+print("\nHEAD")
+display(df.head())
+
+print("\nSHAPE:", df.shape)
+print("\nINFO:")
+df.info()
+
+print("\nDESCRIBE (num):")
+display(df.describe().round(2))
+
+missing = df.isna().sum().rename("missing_count").to_frame()
+missing["missing_pct"] = (missing["missing_count"] / len(df) * 100).round(2)
+print("\nMISSING VALUES:")
+display(missing.sort_values("missing_count", ascending=False))
+
+print("\nCATEGORICAL COUNTS (top):")
+categorical_cols = df.select_dtypes(include=["object","category"]).columns.tolist()
+for c in categorical_cols:
+    print(f"\nColumn: {c}")
+    display(df[c].value_counts(dropna=False).to_frame(name="count"))
+
+# === PLOTS (matplotlib only) ===
+plt.figure(figsize=(7,4))
+plt.hist(df["avg_score"].dropna(), bins=20)
+plt.title("Distribution des scores moyens (avg_score)")
+plt.xlabel("avg_score")
+plt.ylabel("Effectif")
+plt.tight_layout()
+plt.savefig("/mnt/data/hist_avg_score.png")
+plt.show()
+
+plt.figure(figsize=(7,4))
+groups = [df.loc[df["test_preparation_course"]==g, "avg_score"].dropna()
+          for g in df["test_preparation_course"].unique()]
+plt.boxplot(groups, labels=list(df["test_preparation_course"].unique()))
+plt.title("avg_score par test_preparation_course")
+plt.ylabel("avg_score")
+plt.tight_layout()
+plt.savefig("/mnt/data/box_avg_by_prep.png")
+plt.show()
+
+gender_means = df.groupby("gender")[["math_score","reading_score","writing_score","avg_score"]].mean()
+plt.figure(figsize=(8,4))
+gender_means.plot(kind="bar")
+plt.title("Moyennes des scores par genre")
+plt.ylabel("Score moyen")
+plt.tight_layout()
+plt.savefig("/mnt/data/bar_gender_means.png")
+plt.show()
+
+num = df.select_dtypes(include=[np.number])
+corr = num.corr()
+plt.figure(figsize=(5,4))
+plt.imshow(corr, interpolation='nearest')
+plt.xticks(range(len(corr.columns)), corr.columns, rotation=45, ha='right')
+plt.yticks(range(len(corr.columns)), corr.columns)
+plt.colorbar()
+plt.title("Matrice de corrélation (numérique)")
+plt.tight_layout()
+plt.savefig("/mnt/data/corr_matrix.png")
+plt.show()
+
+plt.figure(figsize=(6,4))
+plt.scatter(df["hours_study_per_week"].fillna(df["hours_study_per_week"].median()), df["avg_score"])
+plt.xlabel("hours_study_per_week")
+plt.ylabel("avg_score")
+plt.title("hours_study_per_week vs avg_score")
+plt.tight_layout()
+plt.savefig("/mnt/data/scatter_hours_vs_avg.png")
+plt.show()
+
+# === Grouped tables ===
+parent_mean = df.groupby("parental_level_of_education")["avg_score"].mean().sort_values(ascending=False).rename("mean_avg_score")
+race_mean = df.groupby("race_ethnicity")["avg_score"].mean().sort_values(ascending=False).rename("mean_avg_score")
+display(parent_mean.to_frame())
+display(race_mean.to_frame())
+
+# === Simple ML: predict avg_score ===
+X = df[["math_score","reading_score","writing_score","hours_study_per_week"]].copy()
+X["hours_study_per_week"] = X["hours_study_per_week"].fillna(X["hours_study_per_week"].median())
+y = df["avg_score"].fillna(df["avg_score"].median())
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+try:
+    from sklearn.ensemble import RandomForestRegressor
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+    mae = mean_absolute_error(y_test, preds)
+    rmse = math.sqrt(mean_squared_error(y_test, preds))
+    r2 = r2_score(y_test, preds)
+    print("RandomForestRegressor results:")
+    print(f"MAE: {mae:.3f}, RMSE: {rmse:.3f}, R2: {r2:.3f}")
+    feat_imp = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)
+    display(feat_imp.to_frame(name="importance"))
+except Exception as e:
+    print("Could not run RandomForestRegressor; skipping ML in this environment.", e)
+
+# Save some outputs
+df.head(100).to_csv("/mnt/data/sample_head.csv", index=False)
+parent_mean.to_frame().to_csv("/mnt/data/parent_mean_avg_score.csv")
+race_mean.to_frame().to_csv("/mnt/data/race_mean_avg_score.csv")
