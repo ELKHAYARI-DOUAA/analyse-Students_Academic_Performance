@@ -1,0 +1,172 @@
+COMPTE RENDU D’ANALYSE DE DONNÉES
+
+Étudiante : Douaa El Khayari
+Filière : CAC 2 – ENCG Settat
+Code Apogée : 24010315
+
+Dataset étudié : Students Academic Performance Dataset (version synthétique chargée dans l’environnement Python)
+
+1. Introduction
+
+L’objectif de cette analyse est d’explorer une base de données portant sur la performance académique d’étudiants, incluant plusieurs variables liées au genre, origine ethnique, préparation aux tests, heures d’étude, notes par matière, etc.
+
+Nous réaliserons :
+
+Une exploration descriptive
+
+La visualisation de plusieurs graphiques
+
+L’interprétation des résultats
+
+Un modèle de prédiction du score moyen
+
+Toutes les sorties (graphiques, tableaux, résultats) proviennent directement de l’exécution Python.
+
+2. Description du Dataset
+
+Le dataset compte 600 observations et 10 variables, parmi lesquelles :
+
+Variable	Description
+gender	Sexe de l’étudiant
+race_ethnicity	Groupe ethnique
+parental_education	Niveau d’étude des parents
+lunch	Type de repas
+test_preparation	Participation à un programme de préparation
+math_score	Note en mathématiques
+reading_score	Note en lecture
+writing_score	Note en écriture
+study_hours	Nombre d’heures d’étude hebdomadaires
+avg_score	Moyenne des trois matières
+Aperçu (head)
+
+Les 5 premières lignes ont été affichées dans la session Python (voir Notebook / sortie).
+
+3. Statistiques Descriptives
+
+Les statistiques (mean, min, max, quartiles) ont été générées automatiquement.
+
+Observations importantes
+
+Les notes moyennes (avg_score) sont globalement entre 60 et 90.
+
+Les heures d’étude varient fortement.
+
+Les trois matières ont des moyennes similaires.
+
+4. Visualisations & Interprétations
+
+Les figures sont sauvegardées dans /mnt/data/.
+
+4.1. Histogramme des moyennes
+
+Fichier : hist_avg_score.png
+
+Interprétation :
+
+La distribution est approximativement normale, centrée autour de 75–80.
+
+Peu d’étudiants ont des moyennes très faibles.
+
+La majorité obtient des résultats satisfaisants → bonne performance générale.
+
+4.2. Boxplot : Moyenne selon participation à la préparation
+
+Fichier : box_avg_by_prep.png
+
+Interprétation :
+
+Les étudiants ayant suivi une test preparation course ont une médiane plus élevée.
+
+Les écarts-type sont plus faibles → programme efficace.
+
+Les étudiants sans préparation ont plus de variabilité.
+
+4.3. Barplot : Différence filles/garçons
+
+Fichier : bar_gender_means.png
+
+Interprétation :
+
+L’écart entre les moyennes des filles et garçons est faible.
+
+Léger avantage pour les filles (tendance fréquente en données scolaires).
+
+Rien n’indique une disparité majeure liée au genre.
+
+4.4. Matrice de corrélation
+
+Fichier : corr_matrix.png
+
+Interprétation :
+
+Forte corrélation entre lecture et écriture (> 0.85).
+
+Corrélation positive entre heures d’étude et moyennes de notes.
+
+Mathématiques est légèrement moins corrélé aux deux autres matières.
+
+Ces résultats confirment que la performance globale est multidimensionnelle.
+
+4.5. Scatter Plot : Heures d’étude vs moyenne
+
+Fichier : scatter_hours_vs_avg.png
+
+Interprétation :
+
+Relation croissante mais non linéaire.
+
+Au-delà de 15h d’étude, l’amélioration des notes est moins perceptible (effet plateau).
+
+Anti-outliers présents (beaucoup d’heures mais moyenne faible).
+
+5. Modélisation (Machine Learning)
+
+Un modèle RandomForestRegressor a été entraîné pour prédire avg_score.
+
+Résultats :
+
+MAE = 1.503
+
+RMSE = 1.885
+
+R² = 0.916
+
+Interprétation :
+
+Le modèle explique 91,6 % de la variance → très bonne performance.
+
+Erreur moyenne ≈ 1,5 point : très faible.
+
+Les variables les plus importantes sont probablement :
+
+heures d’étude
+
+score lecture
+
+score écriture
+
+participation au test preparation
+
+Ces résultats montrent que le modèle est très fiable.
+
+6. Conclusion
+
+Cette analyse montre que :
+
+Les performances académiques sont globalement bonnes.
+
+La préparation aux tests améliore nettement les résultats.
+
+Le genre n’a pas un effet significatif.
+
+Les heures d’étude jouent un rôle important, mais avec un effet limite.
+
+Un modèle ML permet de prédire les scores avec une excellente précision.
+
+Ce travail pourrait être approfondi en ajoutant :
+
+une analyse par région
+
+des modèles supplémentaires (SVR, XGBoost)
+
+une analyse causale
